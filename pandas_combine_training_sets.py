@@ -1,4 +1,5 @@
 import click
+import glob
 import os
 import pandas as pd
 import shutil
@@ -90,14 +91,14 @@ def combine_databases(db_paths, image_counts, output_db_path):
     conn_output.close()
 
 @click.command()
-@click.option('--db-paths', required=True, help='Comma-separated list of database paths.')
-@click.option('--training-set-paths', required=True, help='Comma-separated list of training set paths.')
+@click.option('--db-paths', required=True, help='E.g. "databases/*.db".')
+@click.option('--training-set-paths', required=True, help='E.g. "training_sets/*.csv"')
 @click.argument('output_db_path', type=click.Path())
 @click.argument('output_training_set_path', type=click.Path())
 def cli(db_paths, training_set_paths, output_db_path, output_training_set_path):
     """Combine multiple SQLite databases and training set CSV files."""
-    db_paths = db_paths.split(',')
-    training_set_paths = training_set_paths.split(',')
+    db_paths = glob.glob(db_paths)
+    training_set_paths = glob.glob(training_set_paths)
     image_counts = [get_number_of_images(db_path) for db_path in db_paths]
     combine_training_sets(training_set_paths, image_counts, output_training_set_path)
     combine_databases(db_paths, image_counts, output_db_path)
